@@ -178,11 +178,14 @@ editor.setValue("");
 		};
 		
 	 nomnoml.seqextract=function(){
-		 var data="Operator->ATM:Customer->ATM:";
+		 $.get("extractSeq/6",function(resp){
+			  var data=resp;
 		editor.setValue(data);
 		setCurrentText(data)
 		storage.moveToLocalStorage();
 		makediagram(data);
+		 });
+		
 		
 	};
 	nomnoml.newObject=function(){
@@ -216,12 +219,15 @@ editor.setValue("");
 		};
 		
 	 nomnoml.objextract=function(){
-		var data="[Object Diagram of ATM | [<instance> Operator |  ]\n"+
-		"  [<instance> Customer | ]\n"+"[<instance> ATM | ]]";
+		 $.get("/extract/3",function(resp){
+			 console.log(resp);
+		 var data=resp;
+		/*var data="[Object Diagram of ATM | [<instance> Operator |  ]\n"+
+		"  [<instance> Customer | ]\n"+"[<instance> ATM | ]]";*/
 		editor.setValue(data);
 		setCurrentText(data)
 		storage.moveToLocalStorage();
-		
+		 });
 	};
 	nomnoml.clsextract=function(){
 		var data="[Class Diagram of ATM |"+
@@ -324,15 +330,12 @@ editor.setValue("");
 		var str=id.diagram.replace (/"/g,'');
 		 editor.setValue(str);
 		  localStorage.setItem("d_id", id.id);
-		
 	}
 	function currentText(){
 		return editor.getValue()
-		
 	}
 
 	function setCurrentText(value){
-		
 		return editor.setValue(value)
 	}
 	function set(){
@@ -363,19 +366,20 @@ editor.setValue("");
 	function diagrams(){
 	var diagram = Diagram.parse(currentText());
 				diagram.drawSVG('diagram',{theme: 'simple'});
-	 
-}
+	}
 	function makediagram(data){
 	document.getElementById("diagram").innerHTML="";
-	 
-}
+	}
 	 function sourceChanged(){
 		try {
-			//editor.setValue("");
+			lineMarker.css('top', -30)
+			lineNumbers.toggleClass('error', false)
+			var superSampling = window.devicePixelRatio || 1
+			var scale = superSampling * Math.exp(zoomLevel/10)
+			
 			document.getElementById("diagram").innerHTML="";
 			Diagram.parse(currentText()).drawSVG('diagram',{theme: 'simple'});
-				storage.save(currentText())
-			
+			storage.save(currentText())
 		} catch (e){
 			var matches = e.message.match('line ([0-9]*)')
 			lineNumbers.toggleClass('error', true)

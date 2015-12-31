@@ -7,9 +7,9 @@ module.exports = {
 	},
 connection: 'mysqlDB',
   schema:true,
-  migrate: 'alter',
+  migrate: 'safe',
  attributes: {
-	  diagram:'string',
+	  diagram:'text',
 	  name:'string',
 	  type:{
 		  type:'string'

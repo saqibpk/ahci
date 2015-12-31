@@ -24,7 +24,7 @@ $(function (){
 
 	var editor = CodeMirror.fromTextArea(textarea, {
 		lineNumbers: true,
-		mode: 'nomnoml',
+		mode: 'raadd',
 		matchBrackets: true,
 		theme: 'solarized light',
 		keyMap: 'sublime'
@@ -46,9 +46,7 @@ $(function (){
 	canvasPanner.addEventListener('wheel', _.throttle(magnify, 50))
 	initImageDownloadLink(imgLink, canvasElement)
 	initToolbarTooltips()
-
-	reloadStorage()
-
+	//reloadStorage()
 	function classToggler(element, className, state){
 		var jqElement = $(element)
 		return _.bind(jqElement.toggleClass, jqElement, className, state)
@@ -98,8 +96,8 @@ $(function (){
 			$.get("/all",function(response,status){
 		for (var r in response) {
 			(function(r){
-				if(response[r].type=='use case diagram'){
-		/* 			var use=document.getElementById("usecase");
+				if(response[r].type=='usecase diagram'){
+					var use=document.getElementById("usecase");
 		  var anchor = document.createElement("a");
 		  anchor.addEventListener("click", function(){ showEditor(response[r]); });
 		  anchor.id='anchr';
@@ -109,7 +107,7 @@ $(function (){
 		  elem.appendChild(anchor);
 		  use.appendChild(elem);
 				}else if(response[r].type=='class diagram'){
-					var cls=document.getElementById("classd");
+					var cls=document.getElementById("clas");
 		  var anchor = document.createElement("a");
 		  anchor.addEventListener("click", function(){ showEditor(response[r]); });
 		  anchor.id='anchr';
@@ -141,9 +139,9 @@ $(function (){
 		  var elem = document.createElement("li");
 		  elem.appendChild(anchor);
 		  obj.appendChild(elem);
-				} */
+				} 
 		
-			}}(r));
+			}(r));
 		}
 	});
 	}
@@ -158,26 +156,36 @@ $(function (){
 	
 	nomnoml.saveEditor = function (){
 		var d_id=localStorage.d_id;
-		console.log(d_id);
-		if(!localStorage.d_id){
+		
+			if(!localStorage.d_id){
 			var name=prompt("Enter Name For Diagram",'Diagram Name');
 			if(name!=null){
-				var type=prompt("Enter Type For Diagram",'1-Class Diagram/2-use case Diagram/3-object Diagram/4-sequence Diagram');
-				if(type=='1' ||type=='2'||type=='3'||type=='4'){
-		var text=editor.getValue();
-		$.post("/",{data:'"'+text+'"',name:name,type:type});
-			}
-			else{
-				alert("invalid type");
-			}
+				var text=editor.getValue();
+			$.post("/",{data:'"'+text+'"',name:name,type:localStorage.type},function(stat){
+				
+				var str=stat.diagram.diagram.replace (/"/g,'');
+		    editor.setValue(str);
+		 	setCurrentText(str)
+			storage.moveToLocalStorage();
+			 localStorage.setItem("d_id", stat.diagram.id);
+			 console.log(stat);
+			 alert(stat.message);
+			});
 			}
 		}
 			else if(localStorage.d_id){
 				var text=editor.getValue();
-				$.post("/update",{data:'"'+text+'"',id:d_id});
+				$.post("/update",{data:'"'+text+'"',id:d_id},function(stat){
+				var str=stat.diagram.diagram.replace (/"/g,'');
+		    editor.setValue(str);
+		 	setCurrentText(str)
+			//storage.moveToLocalStorage();
+			 localStorage.setItem("d_id", stat.diagram.id);
+			 alert(stat.message);
+			});
 			}
+	
 	}
-
 	nomnoml.saveViewModeToStorage = function (){
 		var question = 
 			'Do you want to overwrite the diagram in ' +
@@ -193,80 +201,197 @@ $(function (){
 	}
 	
 	nomnoml.newObject=function(){
-			var data="[Object Diagram of ATM |[<instance> Operator | employee_id | name ]\n "+
-			"[<instance> Customer | customer_id | name | pin_code| account_number | credit]\n"+
-			" [<instance> ATM | atm_id | bank_id | cash]]";
-			setCurrentText(data)
+		$("#canvas").show();
+		 $("#diagram").hide();
+		localStorage.type="object diagram";
+		localStorage.d_id="";
+		var data="";
 			editor.setValue(data);
-			
-		};
+			setCurrentText(data)
+			//storage.moveToLocalStorage();
+			};
 	nomnoml.newSequence=function(){
-			var data="Operator->ATM: startATM()"+
-				"Customer->ATM: initiateSession()"+
-				"ATM-> Customer: login()"+
-				"Customer-> ATM: checkLogin()"+
-				"ATM->Customer: showOperations()"+
-				"Customer->ATM: selectOperation()"+
-				"ATM->Customer: enterAmount()"+
-				"Customer->ATM: cashWidra()"+
-				"ATM->Customer: logout()"+
-				"ATM->Operator: stopATM()";
+		$("#canvas").hide();
+		 $("#diagram").show();
+			 document.getElementById("diagram").innerHTML="";			 
+			var data="";
+				localStorage.type="sequence diagram";
+				localStorage.d_id="";
+		
 				setCurrentText(data)
 				editor.setValue(data);
 				storage.moveToLocalStorage();
-				window.location.href="sequence.html";
-		}; 
-	nomnoml.newed=function(){
+		};
+	/* nomnoml.newed=function(){
+		document.getElementById("canvas").visibility="visible";
+		document.getElementById("diagram").visibility="hidden";
+		
 			var data="[default page]";
 			//document.getElementById("canvas").visibility="hidden";
 			editor.setValue(data);
 			setCurrentText(data)
 			storage.moveToLocalStorage();
-		}
-		nomnoml.newUse=function(){
-			var data="[Usecase of ATM|[<actor> Operator] ->[<usecase> System Startup]\n"+
-			"[<actor> Operator] ->[<usecase> System Shutdown]\n"+" [<actor> Customer] ->[<usecase> Session] \n"+
-			" [<usecase> Session]<<include>> -> [<usecase> Transaction]\n"+
-			"[<usecase> Invalid pin]<<extend>> -> [<usecase> Transaction]]";
+		} */
+	nomnoml.newUse=function(){
+		$("#canvas").show();
+		 $("#diagram").hide();
+			localStorage.type="usecase diagram";
+			localStorage.d_id="";
+			var data="";
 			editor.setValue(data);
-		setCurrentText(data)
-		storage.moveToLocalStorage();
-			//localStorage.d_id="";
+			setCurrentText(data)
+			storage.moveToLocalStorage();
 		};
-		
-	 nomnoml.objextract=function(){
-		var data="[Object Diagram of ATM | [<instance> Operator |  ]\n"+
-		"  [<instance> Customer | ]\n"+"[<instance> ATM | ]]";
-		editor.setValue(data);
-		setCurrentText(data)
-		storage.moveToLocalStorage();
-		
+	nomnoml.newClass=function(){
+		$("#canvas").show();
+		 $("#diagram").hide();
+		localStorage.type="class diagram";
+		localStorage.d_id="";
+			var data="";
+			editor.setValue(data);
+			setCurrentText(data)
+			//storage.moveToLocalStorage();
+	}  
+	nomnoml.objextract=function(){
+		$("#canvas").show();
+		 $("#diagram").hide();
+		 $.get("/usecase_diagrams",function(usecases){
+			// console.log(usecases);
+			$('#myModal').modal('toggle');
+			 document.getElementById("use").innerHTML="";
+			
+			document.getElementsByClassName("modal-title")[0].innerHTML="Use Case Diagrams";
+			for(var a in usecases){
+					(function(a){
+				var obj=document.getElementById("use");
+		  var anchor = document.createElement("a");
+		  anchor.addEventListener("click", function(){ 
+			$.get("/extract/"+usecases[a].id,function(res){
+				console.log(res)
+				$('#myModal').modal('hide');
+			});
+
+		  });		  
+		  anchor.id='anchr';
+		  anchor.href='#';
+		  anchor.innerText = usecases[a].name;
+		  var elem = document.createElement("li");
+		  elem.appendChild(anchor);
+		  obj.appendChild(elem);
+				}(a));
+			}
+		 });
 	};
 	nomnoml.clsextract=function(){
-		var data="[Class Diagram of ATM |"+
-  "[ Operator | employee_id  || startATM() | stopATM()]\n"+ 
-  "[Customer | customer_id  | pin_code| account_number"+
-  "| credit || login()  | showOperations() | enterAmount() | logout()]\n" +
-  "[ATM | atm_id | bank_id | cash ||  initiateSession() |checkLogin() |"+
-   "selectOperation() |  cashWidraw() ]\n"+
- "]";editor.setValue(data);
-		setCurrentText(data)
-		storage.moveToLocalStorage();
+		$("#canvas").show();
+		 $("#diagram").hide();
+		var idz={};
+		$.get("/object_diagrams",function(objects){
+		$.get("/sequence_diagrams",function(seqs){
+			 $('#ModalTwo').modal('toggle');
+			 var bdy=document.getElementsByClassName("modal-bodytwo")
+			document.getElementById("use").innerHTML="";
+			document.getElementsByClassName("modal-titletwo")[0].innerHTML="Object Diagrams && Sequence Diagrams";
+				var ul1=document.createElement("ul");
+				ul1.id="objd";
+				bdy[0].appendChild(ul1);
+				var li=document.createElement("li");
+				li.innerHTML="Object Diagrams";
+				 ul1.appendChild(li);
+				for(var o in objects){
+					(function(o){
+				var obj=document.getElementById("objd");
+				
+		  var anchor = document.createElement("a");
+		  anchor.addEventListener("click", function(){ 
+		  idz.obj_id=objects[o].id;
+		  bdy[0].removeChild(ul1);
+		if(!document.getElementsByClassName("modal-bodytwo")[0].innerText){
+			$.get("/extractClass/"+idz.obj_id+"/"+idz.seq_id,function(resp){
+				editor.setValue(resp);
+			setCurrentText(resp)
+				$('#ModalTwo').modal('hide');
+			
+			})
+		}
+		});		  
+		  anchor.id='anchr';
+		  anchor.href='#';
+		   anchor.innerText = objects[o].name;
+		  var elem = document.createElement("li");
+		  elem.appendChild(anchor);
+		  obj.appendChild(elem);
+			}(o));
+				}
+				var ul2=document.createElement("ul");
+				ul2.id="seqd";
+				bdy[0].appendChild(ul2);
+				var li=document.createElement("li");
+				li.innerHTML="Sequence Diagrams";
+				 ul2.appendChild(li);
+				for(var o in seqs){
+					(function(o){
+				var obj=document.getElementById("seqd");
+				
+		  var anchor = document.createElement("a");
+		  anchor.addEventListener("click", function(){ 
+		  idz.seq_id=seqs[o].id;
+		  bdy[0].removeChild(ul2);
+		  if(!document.getElementsByClassName("modal-bodytwo")[0].innerText){
+			$.get("/extractClass/"+idz.obj_id+"/"+idz.seq_id,function(resp){
+				editor.setValue(resp);
+			setCurrentText(resp)
+				$('#ModalTwo').modal('hide');
+			})
+		}
+		});		  
+		  anchor.id='anchr';
+		  anchor.href='#';
+		   anchor.innerText = seqs[o].name;
+		  var elem = document.createElement("li");
+		  elem.appendChild(anchor);
+		  obj.appendChild(elem);
+			}(o));
+				}
+		});
+		 });
 	}
-	 nomnoml.newClass=function(){
-		var data="[Class Diagram of ATM |"+
-  "[person | name] <:- [Operator]\n"+
-  "[person | name] <:- [Customer]\n"+
-  "[ Operator | employee_id  || startATM() | stopATM()]\n "+
-  "[Customer | customer_id  | pin_code| account_number"+
-  "| credit || login()  | showOperations() | enterAmount() | logout()]\n "+
-  "[ATM | atm_id | bank_id | cash ||  initiateSession() |checkLogin() |"+
-   "selectOperation() |  cashWidraw() ]"+
- "]";
-			editor.setValue(data);
-		setCurrentText(data)
-		storage.moveToLocalStorage();
-	}  
+	nomnoml.seqextract=function(){
+		 $("#canvas").hide();
+		 $("#diagram").show();
+		 
+		$.get("/object_diagrams",function(objects){
+			 $('#myModal').modal('toggle');
+			 document.getElementById("use").innerHTML="";
+			document.getElementsByClassName("modal-title")[0].innerHTML="Object Diagrams";
+				for(var u in objects){
+					(function(u){
+				var obj=document.getElementById("use");
+		  var anchor = document.createElement("a");
+		  anchor.addEventListener("click", function(){ 
+		 // console.log(objects[u].id);
+			$.get("/extractSeq/"+objects[u].id,function(res){
+				
+				$('#myModal').modal('hide');
+				editor.setValue(res);
+				setCurrentText(res);
+				sourceChanged();
+			});
+		  });		  
+		  anchor.id='anchr';
+		  anchor.href='#';
+		  anchor.innerText = objects[u].name;
+		  var elem = document.createElement("li");
+		  elem.appendChild(anchor);
+		  obj.appendChild(elem);
+				}(u));
+				}
+		 });
+	};
+	function getID(diagram){
+		console.log(diagram);
+		$('#myModal').modal('hide');
+	}
 	// Adapted from http://meyerweb.com/eric/tools/dencoder/
 	function urlEncode(unencoded) {
 		return encodeURIComponent(unencoded).replace(/'/g,'%27').replace(/"/g,'%22')
@@ -340,38 +465,46 @@ $(function (){
 		else storageStatusElement.hide()
 	}
 	function showEditor(id){
+		
+		if(id.type!="sequence diagram"){
+		 $("#canvas").show();
+		 $("#diagram").hide();
 		var str=id.diagram.replace (/"/g,'');
 		 editor.setValue(str);
 		 localStorage.setItem("d_id", id.id);
+			
+		}	
+else{
+	$("#canvas").hide();
+		 $("#diagram").show();
 		
+	var str=id.diagram.replace (/"/g,'');
+		 editor.setValue(str);
+		 localStorage.setItem("d_id", id.id);	
+		
+}		
 	}
 	function currentText(){
 		return editor.getValue()
 		
 	}
-
+	
 	function setCurrentText(value){
 		return editor.setValue(value)
 	}
 
 	function sourceChanged(){
 		try {
+			document.getElementById("diagram").innerHTML="";			
 			lineMarker.css('top', -30)
 			lineNumbers.toggleClass('error', false)
 			var superSampling = window.devicePixelRatio || 1
 			var scale = superSampling * Math.exp(zoomLevel/10)
-			
-			
-				if(document.getElementById("diagram")){
-					document.getElementById("diagram").innerHTML=""
-					
-					Diagram.parse(currentText()).drawSVG('diagram',{theme: 'simple'});
-		};
-			
 			var model = nomnoml.draw(canvasElement, currentText(), scale)
 			positionCanvas(canvasElement, superSampling, offset)
-			setFilename(model.config.title)
-			storage.save(currentText())
+			Diagram.parse(currentText()).drawSVG('diagram',{theme: 'simple'});
+			setFilename(model.config.title);
+			storage.save(currentText());
 		} catch (e){
 			var matches = e.message.match('line ([0-9]*)')
 			lineNumbers.toggleClass('error', true)

@@ -19,7 +19,7 @@ module.exports = {
       
 	 user : process.env.OPENSHIFT_MYSQL_DB_USERNAME || "root",
 		password : process.env.OPENSHIFT_MYSQL_DB_PASSWORD || "",
-		database : process.env.OPENSHIFT_GEAR_NAME || 'raadd',
+		database : process.env.OPENSHIFT_GEAR_NAME || 'classDiagram',
 		host:process.env.OPENSHIFT_MYSQL_DB_HOST || "localhost",
 		port:process.env.OPENSHIFT_MYSQL_DB_PORT,
 		

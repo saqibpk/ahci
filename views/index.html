@@ -8,6 +8,7 @@
 <title>raadd</title>
 <link rel="stylesheet" href="codemirror/codemirror.css">
 <link rel="stylesheet" href="codemirror/solarized.nomnoml.css">
+<link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
 <link rel="stylesheet" href="./nomnoml.css">
 <link rel="shortcut icon" href="favicon.png">
 </head>
@@ -15,10 +16,11 @@
 	<div class="wrap">
 
 		<canvas id="canvas"></canvas>
-		<textarea id="textarea" spellcheck="false"></textarea>
+		 <div id="diagram"></div>
+		 <textarea id="textarea" spellcheck="false"></textarea>
 		 <div id="linenumbers"></div>
 		 <div id="canvas-panner"></div>
-
+			
 		<div id="reference" class="sidebar">
 			<div class="content">
 				<h2>Association types</h2>
@@ -186,31 +188,26 @@
 		<div id="linemarker"></div>
 		<div id="list" class="sidebar">
 			<div class="content">
-			<h2><a href="#" onclick="nomnoml.newUse()">Use case Diagram</a></h2>
-				<ul >
-				 <li ><a href="#" onclick="nomnoml.newed()">New</a></li>							
-				 	</ul>							
-			
-			<h2><a href="#" onclick="nomnoml.newObject()">Object Diagram</a></h2>
-			<ul >
-				 <li><a href="#" onclick="nomnoml.newed()">New</a></li>							
-				 <li><a href="#"  onclick="nomnoml.objextract()">Extract</a></li>	
-				
+			<h2><a href="#" >Use case Diagram</a></h2>
+			<ul id="usecase">
+				 <li ><a href="#" onclick="nomnoml.newUse()">New</a></li>							
+			</ul>	
+			<h2><a href="#">Object Diagram</a></h2>
+			<ul id="object">
+				 <li><a href="#" onclick="nomnoml.newObject()">New</a></li>							
+				 <li><a href="#"  onclick="nomnoml.objextract()">Extract</a>
+				 </li>	
+			</ul>
+			<h2><a href="#">Sequence Diagram</a></h2>
+				<ul id="sequence">
+					<li><a href="#"  onclick="nomnoml.newSequence()">New</a></li>	
+					<li><a href="#"  onclick="nomnoml.seqextract()">Extract</a></li>
 				</ul>
-				
-			 <h2><a href="#" onclick="nomnoml.newSequence()">Sequence Diagram</a></h2>
-			 
-			<ul >
-				 <li><a href="#" onclick="nomnoml.newed()">New</a></li>							
-				 <li><a href="#"  onclick="nomnoml.objextract()">Extract</a></li>	
-				
-				</ul>
-			 <h2><a href="#" onclick="nomnoml.newClass()">Class Diagram</a></h2>
-				<ul>
-				 <li><a href="#" onclick="nomnoml.newed()">New</a></li>							
+			 <h2><a href="#">Class Diagram</a></h2>
+			 <ul id="clas">
+				 <li><a href="#" onclick="nomnoml.newClass()">New</a></li>							
 				 <li><a href="#"  onclick="nomnoml.clsextract()">Extract</a></li>	
-					</ul>
-									
+			</ul>									
 			</div>
 			</div>
 				<div class="tools">
@@ -258,53 +255,48 @@
 			</div>
 		</div>
 	</div>
-<!-- modal box -->
-			<div id="myModal" class="modal fade" role="dialog">
+	<!-- modal box -->
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog">
   <div class="modal-dialog">
-
-    <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">use case diagrams</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title"></h4>
       </div>
       <div class="modal-body">
-        <p>Some text in the modal.</p>
-      </div>
+        <ul id='use'></ul>
+        </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+     <!--    <button type="button" class="btn btn-primary">Save changes</button>
+      --> </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- modal box -->
+	<div class="modal fade" id="ModalTwo" tabindex="-1" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-titletwo"></h4>
       </div>
-    </div>
-
-  </div>
-</div>
-			<!-- end modal box -->
-	
-	<script type="text/vnd.nomnoml.class" id="defaultGraph">/* [Pirate|eyeCount: Int|raid();pillage()|
-  [beard]--[parrot]
-  [beard]-:>[foul mouth]
-]
-
-[<abstract>Marauder]<:--[Pirate]
-[Pirate]- 0..7[mischief]
-[jollyness]->[Pirate]
-[jollyness]->[rum]
-[jollyness]->[singing]
-[Pirate]-> *[rum|tastiness: Int|swig()]
-[Pirate]->[singing]
-[singing]<->[rum]
-
-[<start>st]->[<state>plunder]
-[plunder]->[<choice>more loot]
-[more loot]->[st]
-[more loot] no ->[<end>e]
-
-[<actor>Sailor] - [<usecase>shiver me;timbers]*/</script> 
-<script type="text/vnd.nomnoml.class" id="empty"></script>
-<script src="bower_components/raphael/raphael-min.js"></script>
+      <div class="modal-bodytwo">
+       
+        </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+     <!--    <button type="button" class="btn btn-primary">Save changes</button>
+      --> </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+	<script  src="./jquery-1.11.3.min.js"></script> 
+	<script type="text/vnd.nomnoml.class" id="defaultGraph"></script> 
+	<script type="text/vnd.nomnoml.class" id="empty"></script>
+	<script src="bower_components/raphael/raphael-min.js"></script>
     <script src="bower_components/underscore/underscore-min.js"></script>
     <script src="bower_components/js-sequence-diagrams/build/sequence-diagram-min.js"></script>
-
 	<script src="lib/zepto.min.js"></script>
 	<script src="lib/lodash.min.js"></script>
 	<script src="lib/dagre.min.js"></script>
@@ -319,9 +311,7 @@
 	<script src="nomnoml.renderer.js"></script>
 	<script src="nomnoml.js"></script>
 	<script src="nomnoml.app.js"></script>
-	<!-- <script src="jquery-1.11.3.min.js"></script>
-	<script src="bootstrap/js/bootstrap.js"></script>
-	 -->
+	<script src="/bootstrap/js/bootstrap.min.js"></script>
 	<script>
 		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
